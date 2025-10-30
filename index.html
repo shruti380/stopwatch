@@ -178,7 +178,8 @@
       </div>
       <hr />
       <div id="btn-container" class="animate-slide-up" style="animation-delay: 0.6s;">
-        <button class="buttons" id="start" onclick="start()">
+        <!-- Added aria-label for accessibility -->
+        <button class="buttons" id="start" onclick="start()" aria-label="Start Stopwatch">
           <i class="fas fa-play-circle"></i>
           <span>Start</span>
         </button>
@@ -584,5 +585,6 @@
 
   <div id="confetti"></div>
 </body>
+
 
 </html>
