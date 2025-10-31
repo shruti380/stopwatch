@@ -278,3 +278,33 @@ footer {
   font-size: 14px;
   color: white;
 }
+
+/* Fix for custom timer button visibility */
+#custom-timer-btn,
+button.custom-timer,
+.custom-timer-btn {
+  color: #222 !important; /* darker text for contrast */
+  background: linear-gradient(135deg, #ffd166 0%, #ffb703 100%) !important;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  z-index: 5;
+}
+
+#custom-timer-btn:hover,
+button.custom-timer:hover {
+  background: linear-gradient(135deg, #ffca3a 0%, #ffb703 100%) !important;
+  transform: scale(1.05);
+}
+.overlay {
+  background: rgba(255, 255, 255, 0.7); /* make it more transparent */
+  backdrop-filter: blur(10px);
+}
+
+.custom-timer-btn {
+  position: relative;
+  z-index: 10;
+}
+Fix: Improved visibility of "CUSTOM TIMER" button text
+
+

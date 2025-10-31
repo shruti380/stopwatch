@@ -2266,3 +2266,25 @@ body.neon-theme .video-overlay {
     font-size: 1rem !important;
   }
 }
+/* === FIX: Stopwatch menu/content overlap === */
+.thinner,
+nav.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Push main content down so it doesn’t hide behind the fixed navbar */
+#container {
+  margin-top: 150px !important; /* previously 100–120px in media queries */
+}
+
+/* Optional – make sure stopwatch cards don’t overlap each other */
+.timer-card,
+#btn-container,
+#record-container {
+  position: relative;
+  z-index: 1;
+  margin-top: 20px;
+}
