@@ -19,22 +19,19 @@ function $id(id) {
 
 // 🎉 Confetti Animation
 function startCelebration() {
-    // Add pulse animation to the timer display
-    document.querySelector('#time').classList.add('pulse');
-    // Create confetti animation
     const root = document.getElementById('confetti');
     if (!root) return;
     root.innerHTML = '';
     const colors = ['#FFD166', '#06D6A0', '#EF476F', '#118AB2', '#8338EC', '#FB5607'];
-    const pieceCount = 150; // Increased for more celebration effect
-    const durationMin = 3000;
-    const durationMax = 6000;
+    const pieceCount = 100; // Optimized count for smooth performance
+    const durationMin = 2000;
+    const durationMax = 4000;
     for (let i = 0; i < pieceCount; i++) {
         const s = document.createElement('span');
         s.className = 'confetti';
         const left = Math.random() * 100;
-        const size = 6 + Math.random() * 10;
-        const delay = Math.random() * 400;
+        const size = 6 + Math.random() * 8;
+        const delay = Math.random() * 300;
         const dur = durationMin + Math.random() * (durationMax - durationMin);
         s.style.left = `${left}vw`;
         s.style.background = colors[i % colors.length];
@@ -48,33 +45,24 @@ function startCelebration() {
 }
 
 function stopCelebration() {
-    // Remove pulse animation from timer display
-    document.querySelector('#time').classList.remove('pulse');
-    // Clear confetti
     const root = document.getElementById('confetti');
     if (root) root.innerHTML = '';
-    // Reset document title
     document.title = "Custom Timer";
-    // Reset timer color
-    $id('time').style.color = '';
 }
 
 function onTimerComplete() {
     paused = true;
     clearInterval(interval);
     closePipWindow(); // Close PiP window on complete
-    $id('timer-control').innerHTML = '<i class="fas fa-play-circle"></i> Play';
+    $id('timer-control').innerHTML = '<i class="fas fa-play-circle"></i> Start';
     // Hide focus text when timer completes
     $id('focus').classList.add('hide');
-    // Show alarm stop button
     $id('stop-alarm').classList.remove('hidden');
-    // Play alarm sound
     audio.loop = true;
     audio.currentTime = 0;
     audio.play().catch(error => {
         console.log('Error playing alarm sound:', error);
     });
-    // Start celebration animation
     startCelebration();
 }
 
@@ -86,16 +74,18 @@ function stopAlarm() {
     stopCelebration();
 }
 
-// 🧮 Progress Bar Updater
+// Updates progress bar based on remaining time
 function updateProgressBar() {
     if (totalTime <= 0) {
         $id("progress-bar").style.width = "0%";
         return;
     }
-    const percent = ((totalTime - customTime.seconds) / totalTime) * 100;
+    // Calculate percentage with bounds checking to prevent overflow
+    const percent = Math.max(0, Math.min(100, ((totalTime - customTime.seconds) / totalTime) * 100));
     $id("progress-bar").style.width = percent + "%";
 }
 
+// Sets up custom timer with user input validation
 const setCustomTime = (hours = 0, minutes = 0, seconds = 0) => {
     hours = Number(hours);
     minutes = Number(minutes);
@@ -105,8 +95,7 @@ const setCustomTime = (hours = 0, minutes = 0, seconds = 0) => {
         alert("⛔ Please enter positive numbers only!");
         return;
     }
-    
-    // Check if at least one field has a value
+
     if (hours === 0 && minutes === 0 && seconds === 0) {
         alert("⛔ Please enter at least one value greater than zero!");
         return;
@@ -117,94 +106,65 @@ const setCustomTime = (hours = 0, minutes = 0, seconds = 0) => {
     $id('minutes').innerHTML = String(minutes).padStart(2, '0');
     $id('seconds').innerHTML = String(seconds).padStart(2, '0');
     remainingTime = 0;
-    $id('timer-control').innerHTML = '<i class="fas fa-play-circle"></i> Play';
-    // Hide focus text when setting new time
+    $id('timer-control').innerHTML = '<i class="fas fa-play-circle"></i> Start';
     $id('focus').classList.add('hide');
     customTime.seconds = (hours * 3600) + (minutes * 60) + seconds;
-    totalTime = customTime.seconds; 
-    updateProgressBar(); 
+    totalTime = customTime.seconds;
+    updateProgressBar();
 
     $id('secondsInput').value = "";
     $id('minutesInput').value = "";
     $id('hoursInput').value = "";
-
 }
 
+// Resets timer to initial state
 const reset = () => {
     stopAlarm();
     closePipWindow(); // Close PiP window on reset
     // Hide focus message
     $id('focus').classList.add('hide');
-    // Reset button styles
-    if (darkTheme) {
-        $('#timer-control').css({ "background": "transparent", "color": "#ff6b35" });
-    } else {
-        $('#timer-control').css({ "background": "transparent", "color": "#00ff00" });
-    }
     clearInterval(interval);
-    
-    // Reset all timer displays to 00
+
     $id('hours').innerHTML = '00';
     $id('minutes').innerHTML = '00';
     $id('seconds').innerHTML = '00';
-    
-    // Clear all input fields
+
     $id('hoursInput').value = '';
     $id('minutesInput').value = '';
     $id('secondsInput').value = '';
-    
-    // Reset timer values
+
     customTime.seconds = 0;
     totalTime = 0;
-    
-    // Reset progress bar
+
     $id("progress-bar").style.width = "0%";
-    
-    // Reset timer color and remove any animations
-    $id('time').style.color = '';
-    $id('time').classList.remove('pulse');
-    
-    // Clear any confetti
+
     const confettiElem = $id('confetti');
     if (confettiElem) confettiElem.innerHTML = '';
-    
-    // Reset pause state
+
     paused = true;
-    $id('timer-control').innerHTML = '<i class="fas fa-play-circle"></i> Play';
-    
-    // Reset document title
+    $id('timer-control').innerHTML = '<i class="fas fa-play-circle"></i> Start';
+
     document.title = 'Custom Timer';
-    
-    // Make sure stop-alarm button is hidden
+
     $id('stop-alarm').classList.add('hidden');
 }
 
-var interval = 0;
+// Timer interval reference
+let interval = 0;
+
+// Main timer control function - starts/pauses countdown
 const startCustomTimerCounter = () => {
     clearInterval(interval);
     paused = !paused;
-    $id('timer-control').innerHTML = paused ? '<i class="fas fa-play-circle"></i> Play' : '<i class="fas fa-pause-circle"></i> Pause';
+    $id('timer-control').innerHTML = paused ? '<i class="fas fa-play-circle"></i> Start' : '<i class="fas fa-pause-circle"></i> Pause';
+
     if (!paused) {
-        // Show focus text when timer is running
         $id('focus').classList.remove('hide');
-        if (darkTheme) {
-            // Apply dark theme styles for active timer
-            $('#timer-control').css({ "background": "rgba(255, 107, 53, 0.2)", "color": "#ff6b35" });
-        } else {
-            // Apply light theme styles for active timer
-            $('#timer-control').css({ "background": "rgba(0, 255, 0, 0.1)", "color": "#00ff00" });
-        }
     } else {
-        // Hide focus text when timer is paused
         $id('focus').classList.add('hide');
-        if (darkTheme) {
-            // Reset to default dark theme styles when paused
-            $('#timer-control').css({ "background": "transparent", "color": "#ff6b35" });
-        } else {
-            // Reset to default light theme styles when paused
-            $('#timer-control').css({ "background": "transparent", "color": "#00ff00" });
-        }
     }
+
+    // Timer update logic executed every second
     const updateTimer = () => {
         if (!paused && customTime.seconds > 0) {
             customTime.seconds--;
@@ -243,12 +203,7 @@ const startCustomTimerCounter = () => {
                 $id('time').style.color = '#ff4757';
             }
         }
-        
-        if (customTime.seconds < 0) {
-            alert("Please Enter a positive time value!");
-            reset();
-        }
-        
+
         if (customTime.seconds === 0) {
             document.title = "Time's Up! - Custom Timer";
             onTimerComplete();
@@ -263,41 +218,6 @@ function setLightTheme() {
     // Remove dark mode class from body
     $('body').removeClass('dark-mode');
     
-    // Navbar styling
-    $('.navbar').css({ "background-color": "rgba(255, 255, 255, 0.95)" });
-    
-    // Title styling
-    $('#title1').css({ "color": "#003333" });
-    
-    // Timer display styling
-    $('.timer').css({ "color": "white" });
-    $('.active').css({ "background": "linear-gradient(to right, #191654, #43C6AC)" });
-    $('.inactive').css({ "background": "rgb(5, 30, 54)" });
-    
-    // Button styling
-    $('.buttons').css({ 
-        "border-color": "white",
-        "background": "rgba(0, 0, 0, 0.4)",
-        "color": "#fefefe"
-    });
-    
-    // Navigation links - always dark
-    $('.nav-link').css({ "color": "#003333" });
-    
-    // Footer styling
-    $('.foot').css({ "background": "rgba(255, 255, 255, 0.95)" });
-    $('.textfooter').css({ "color": "black" });
-    $('.link').css({ "background-color": "#fff", "color": "#000" });
-    $('.my-class').css({ "background": "rgba(255, 255, 255, 0.95)" });
-    
-    // Form styling
-    $('.form__field').css({ "color": "#fff", "border-bottom-color": "#9b9b9b" });
-    $('.form__label').css({ "color": "#9b9b9b" });
-    
-    // Progress bar
-    $('#progress-container').css({ "background-color": "#ddd" });
-    $('#progress-bar').css({ "background": "linear-gradient(90deg, #21f341, #116399)" });
-    
     // Set checkbox state
     $('#light').prop("checked", false);
 }
@@ -308,47 +228,14 @@ function setDarkTheme() {
     // Add dark mode class to body
     $('body').addClass('dark-mode');
     
-    // Navbar styling
-    $('.navbar').css({ "background-color": "rgba(0, 0, 0, 0.95)" });
-    
-    // Title styling
-    $('#title1').css({ "color": "white" });
-    
-    // Timer display styling
-    $('.timer').css({ "color": "#ff6b35" });
-    $('.active').css({ "color": "#ff6b35", "background": "#191212" });
-    $('.inactive').css({ "background": "black", "color": "white" });
-    
-    // Button styling
-    $('.buttons').css({ 
-        "border-color": "#ff6b35",
-        "background": "rgba(255, 107, 53, 0.2)",
-        "color": "#ff6b35"
-    });
-    
-    // Navigation links - always dark
-    $('.nav-link').css({ "color": "#003333" });
-    
-    // Footer styling
-    $('.foot').css({ "background": "rgba(0, 0, 0, 0.95)" });
-    $('.textfooter').css({ "color": "white" });
-    $('.link').css({ "background-color": "#ff6b35", "color": "white" });
-    $('.my-class').css({ "background": "rgba(0, 0, 0, 0.95)" });
-    
-    // Form styling
-    $('.form__field').css({ "color": "#ff6b35", "border-bottom-color": "#ff6b35" });
-    $('.form__label').css({ "color": "#ff6b35" });
-    
-    // Progress bar
-    $('#progress-container').css({ "background-color": "#333" });
-    $('#progress-bar').css({ "background": "#ff6b35" });
-    
     // Set checkbox state
     $('#light').prop("checked", true);
 }
 
-var prefersDarkThemeMql = window.matchMedia("(prefers-color-scheme: dark)");
+// System theme detection
+const prefersDarkThemeMql = window.matchMedia("(prefers-color-scheme: dark)");
 
+// Listen for system theme changes
 prefersDarkThemeMql.addEventListener("change", function (mql) {
     if (localStorage.getItem("darkmode") === null && mql.matches) {
         setDarkTheme();
@@ -358,6 +245,7 @@ prefersDarkThemeMql.addEventListener("change", function (mql) {
 })
 
 $(document).ready(function () {
+    // Set initial theme based on user preference or system setting
     if (
         localStorage.getItem("darkmode") == "true" ||
         (localStorage.getItem("darkmode") === null && prefersDarkThemeMql.matches)
@@ -368,12 +256,37 @@ $(document).ready(function () {
     $('#light').on("change paste keyup", function (e) {
         if (!e.target.checked) {
             setLightTheme();
-            localStorage.setItem("darkmode", false);
+            localStorage.setItem("darkmode", "false");
         }
         else {
             setDarkTheme();
-            localStorage.setItem("darkmode", true);
+            localStorage.setItem("darkmode", "true");
         }
+    });
+
+    // Enable Enter key to start timer from input fields
+    const inputs = ['hoursInput', 'minutesInput', 'secondsInput'];
+    inputs.forEach(id => {
+        $id(id).addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                setCustomTime(
+                    $id('hoursInput').value,
+                    $id('minutesInput').value,
+                    $id('secondsInput').value
+                );
+            }
+        });
+    });
+
+    // Mobile navbar auto-close functionality
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const navbarCollapse = document.getElementById('navbarSupportedContent');
+            if (navbarCollapse.classList.contains('show')) {
+                navbarCollapse.classList.remove('show');
+            }
+        });
     });
 });
 
@@ -483,20 +396,21 @@ setInterval(() => {
   if ($id("d1")) $id("d1").innerHTML = dateStr;
 }, 1000);
 
-// Add event listeners for Enter key in input fields
-document.addEventListener('DOMContentLoaded', function() {
-  const inputs = ['hoursInput', 'minutesInput', 'secondsInput'];
+// --- Duplicate Function ---
+// // Add event listeners for Enter key in input fields
+// document.addEventListener('DOMContentLoaded', function() {
+//   const inputs = ['hoursInput', 'minutesInput', 'secondsInput'];
   
-  inputs.forEach(id => {
-    $id(id).addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        setCustomTime(
-          $id('hoursInput').value,
-          $id('minutesInput').value,
-          $id('secondsInput').value
-        );
-      }
-    });
-  });
-});
+//   inputs.forEach(id => {
+//     $id(id).addEventListener('keypress', function(e) {
+//       if (e.key === 'Enter') {
+//         e.preventDefault();
+//         setCustomTime(
+//           $id('hoursInput').value,
+//           $id('minutesInput').value,
+//           $id('secondsInput').value
+//         );
+//       }
+//     });
+//   });
+// });

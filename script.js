@@ -57,10 +57,10 @@ function preloadAudio() {
 document.addEventListener("DOMContentLoaded", function () {
   preloadAudio();
   loadStopwatchState();
-  
+
   // Load dark mode preference
   loadDarkModePreference();
-  
+
   // Initialize tick toggle
   tickToggle = document.getElementById("tickToggle");
   if (tickToggle) {
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Handle real-time toggle during stopwatch running
       if (timer) {
         if (isTickEnabled) {
-          tickSound.play().catch(() => {});
+          tickSound.play().catch(() => { });
         } else {
           tickSound.pause();
           tickSound.currentTime = 0;
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
-  
+
   // Setup dark mode toggle
   setupDarkModeToggle();
   
@@ -127,7 +127,7 @@ function loadStopwatchState() {
         sec = state.sec || 0;
         count = state.count || 0;
         lapCounter = state.lapCounter || 1;
-        
+
         // Update display
         updateDisplay();
       }
@@ -151,7 +151,7 @@ function updateDisplay() {
 function setupDarkModeToggle() {
   const checkbox = document.getElementById("light");
   if (checkbox) {
-    checkbox.addEventListener("change", function() {
+    checkbox.addEventListener("change", function () {
       document.body.classList.toggle("dark-mode");
       // Save preference
       localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
@@ -162,7 +162,7 @@ function setupDarkModeToggle() {
 function loadDarkModePreference() {
   const darkMode = localStorage.getItem('darkMode');
   const checkbox = document.getElementById("light");
-  
+
   if (darkMode === 'true') {
     document.body.classList.add('dark-mode');
     if (checkbox) checkbox.checked = true;
@@ -178,8 +178,10 @@ function $id(id) {
 
 // Play sound effect
 function playSound(sound) {
-  sound.currentTime = 0;
-  sound.play().catch(() => {});
+  if (sound && sound.readyState >= 2) {
+    sound.currentTime = 0;
+    sound.play().catch(() => { });
+  }
 }
 
 // ============================================
@@ -189,27 +191,27 @@ function playSound(sound) {
 function start() {
   if (!timer) {
     timer = true;
-    
+
     // Play start sound
     playSound(startSound);
-    
+
     if (isTickEnabled) {
-      tickSound.play().catch(() => {});
+      tickSound.play().catch(() => { });
     }
     if ($id("start"))
       $id("start").innerHTML = '<i class="far fa-pause-circle"></i> Pause';
     enhancedStopwatch();
   } else {
     timer = false;
-    
+
     // Play beep sound on pause
     playSound(beepSound);
-    
+
     tickSound.pause();
     if ($id("start"))
       $id("start").innerHTML = '<i class="far fa-play-circle"></i> Start';
   }
-  
+
   // Save state
   saveStopwatchState();
 }
@@ -232,7 +234,7 @@ function reset() {
   
   // Play beep sound on reset
   playSound(beepSound);
-  
+
   tickSound.pause();
   tickSound.currentTime = 0;
   if ($id("start"))
@@ -254,7 +256,7 @@ function reset() {
   if ($id("record-table-body")) $id("record-table-body").innerHTML = "";
   lapCounter = 1;
 
-    // CLEAR COUNTDOWN INPUT & PRESETS
+  // CLEAR COUNTDOWN INPUT & PRESETS
   const countdownInput = $id("countdown-minutes");
   if (countdownInput) {
     countdownInput.value = "";
@@ -267,7 +269,7 @@ function reset() {
   document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.classList.remove('active');
   });
-  
+
   // Clear saved state
   localStorage.removeItem('stopwatchState');
 }
@@ -359,7 +361,7 @@ function lap() {
   if (timer) {
     // Play beep sound
     playSound(beepSound);
-    
+
     if ($id("record-container"))
       $id("record-container").style.display = "block";
     
@@ -658,7 +660,7 @@ function setPresetTimer(minutes) {
   presetSound.play().catch(() => {
     // Ignore audio play errors (browser restrictions)
   });
-  
+
   // Set the input value
   document.getElementById("countdown-minutes").value = minutes.toFixed(1);
   
@@ -666,20 +668,20 @@ function setPresetTimer(minutes) {
   document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.classList.remove('active');
   });
-  
+
   // Find and activate the clicked preset
   const clickedBtn = document.querySelector(`[data-minutes="${minutes}"]`);
   if (clickedBtn) {
     clickedBtn.classList.add('active');
   }
-  
+
   // Add visual feedback to input field
   const input = document.getElementById("countdown-minutes");
   input.style.border = "2px solid #ffb703";
   input.style.background = "rgba(255, 183, 3, 0.1)";
   input.style.color = "white";
   input.style.transform = "scale(1.02)";
-  
+
   setTimeout(() => {
     input.style.transform = "scale(1)";
     input.style.background = "rgba(255, 255, 255, 0.08)";
@@ -899,40 +901,41 @@ function toggleLightMode() {
         localStorage.setItem('darkMode', false);
     }
 }
-document.addEventListener('keydown', function(event) {
-    switch(event.key.toLowerCase()) {
-        case ' ':
-            event.preventDefault();
-            startPauseStopwatch(); 
-            break;
-        case 'r':
-            resetStopwatch();
-            break;
-        case 'l':
-            recordLap();
-            break;
-        case 'c':
-            startCountdownTimer();
-            break;
-    }
+
+document.addEventListener('keydown', function (event) {
+  switch (event.key.toLowerCase()) {
+    case ' ':
+      event.preventDefault();
+      startPauseStopwatch();
+      break;
+    case 'r':
+      resetStopwatch();
+      break;
+    case 'l':
+      recordLap();
+      break;
+    case 'c':
+      startCountdownTimer();
+      break;
+  }
 });
 function startPauseStopwatch() {
-    start();
+  start();
 }
 function resetStopwatch() {
-    reset();
+  reset();
 }
 function recordLap() {
-    lap();
+  lap();
 }
 function startCountdownTimer() {
-    if (mode === "countdown") {
-        document.getElementById("start-countdown").click();
-    } else {
-        mode = "countdown";
-        countdownBtn.click();
-        document.getElementById("start-countdown").click();
-    } 
+  if (mode === "countdown") {
+    document.getElementById("start-countdown").click();
+  } else {
+    mode = "countdown";
+    countdownBtn.click();
+    document.getElementById("start-countdown").click();
+  }
 }
 
 
